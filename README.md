@@ -78,9 +78,19 @@ Les couleurs sont une proposition personnelle : ce ne sont pas celles d'une appl
 - Safari peut effacer le stockage d'un site non installé après plusieurs semaines sans visite. L'installation sur l'écran d'accueil protège mieux les données.
 - En navigation privée, les données peuvent disparaître à la fermeture.
 
+## Le son ne marche plus
+
+Sur iPhone, un verrouillage, un appel ou une autre application qui prend le son peut bloquer le son d'une page web. L'application surveille son moteur audio : s'il se bloque, le bouton « Touchez pour réactiver le son » apparaît pendant la séance et un toucher le reconstruit. Réglages > Sons > Tester le son et la voix indique l'état réel et fait un essai.
+
+Si le test reste muet : vérifiez le bouton Silencieux de l'iPhone (ou activez « Sonner malgré le mode Silencieux »), le volume du téléphone et le volume général de l'application.
+
+## Mettre à jour
+
+Après chaque nouvelle version, changez `VERSION` dans `sw.js`. Sur iPhone, l'icône de l'écran d'accueil est figée à l'installation : pour voir une nouvelle icône, supprimez l'application de l'écran d'accueil puis ajoutez-la de nouveau depuis Safari. Attention : sur iPhone, supprimer l'application efface ses données. Exportez-les avant (Réglages > Données > Exporter tout), puis importez le fichier dans l'application réinstallée.
+
 ## État des tests
 
-Effectués dans Chrome : 30 tests du moteur sur horloge simulée et 33 tests de bout en bout (audio Web Audio réel, séances complètes, reprise après gel et actualisation, import et export, hors connexion, données invalides, multitimer, largeur 320 px).
+Effectués dans Chrome : 30 tests du moteur sur horloge simulée et 36 tests de bout en bout (audio Web Audio réel, séances complètes, reprise après gel et actualisation, import et export, hors connexion, données invalides, multitimer, largeur 320 px).
 
 Non effectués : essai sur un vrai iPhone ou dans Safari, écoute humaine du gong. Le gong a été choisi d'après ses mesures (spectre, attaque, décroissance, absence d'écrêtage).
 
