@@ -1,6 +1,6 @@
 /* Timer Pro : fonctionnement hors connexion.
    Changez VERSION à chaque déploiement pour renouveler le cache des fichiers fixes. */
-const VERSION = 'timer-pro-v2';
+const VERSION = 'timer-pro-v4';
 const FILES = [
   './',
   'index.html',

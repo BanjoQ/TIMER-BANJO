@@ -38,7 +38,8 @@ h1,h2,h3,h4,p{margin:0}
 :focus-visible{outline:3px solid var(--accent);outline-offset:2px}
 .ic{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
 
-#app{height:100vh;height:100dvh;display:flex;flex-direction:column}
+/* Ancré aux quatre bords : sur iPhone installé, 100vh/100dvh laissent une bande vide en bas */
+#app{position:fixed;inset:0;display:flex;flex-direction:column}
 #view{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:calc(var(--top) + 14px) calc(var(--rgt) + 16px) 28px calc(var(--lft) + 16px)}
 #view>*{max-width:1120px;margin-inline:auto}
 body.layered #app{visibility:hidden}
@@ -101,9 +102,9 @@ select{background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),
 .empty p{max-width:34ch}
 
 /* Navigation */
-#nav{display:flex;background:var(--bg2);padding:6px calc(var(--rgt) + 8px) calc(var(--bot) + 6px) calc(var(--lft) + 8px)}
+#nav{display:flex;background:var(--bg2);padding:2px calc(var(--rgt) + 8px) max(4px, calc(var(--bot) - 10px)) calc(var(--lft) + 8px)}
 :root[data-theme=light] #nav{background:#fff}
-.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;min-height:52px;justify-content:center;color:var(--muted);font-size:13px;font-weight:600;border-radius:12px}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:1px;min-height:50px;justify-content:center;color:var(--muted);font-size:13px;font-weight:600;border-radius:12px}
 .nav-item.on{color:var(--text)}
 .nav-item.on .ic{color:var(--accent)}
 :root[data-theme=light] .nav-item.on .ic{color:var(--text)}
@@ -129,7 +130,7 @@ select{background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),
 .cat{display:flex;align-items:center;gap:10px;padding:10px;border-radius:16px;background:var(--surface);font-weight:600;text-align:left;line-height:1.15;min-height:66px}
 :root[data-theme=light] .cat{background:var(--bg)}
 .report{margin:6px 0 0;padding-left:18px;color:var(--muted);font-size:15px}
-#toasts{position:fixed;z-index:80;left:0;right:0;bottom:calc(var(--bot) + 84px);display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none;padding:0 16px}
+#toasts{position:fixed;z-index:80;left:0;right:0;bottom:calc(var(--bot) + 72px);display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none;padding:0 16px}
 .toast{background:var(--text);color:var(--bg);padding:11px 16px;border-radius:14px;font-weight:600;max-width:440px}
 .toast.bad{background:var(--alert);color:#101116}
 
@@ -1167,8 +1168,24 @@ const Sound = {
     if (bad && this.ctx.state !== 'closed') this.ctx.resume().catch(() => {});
     if (bad !== this.broken) { this.broken = bad; this.changed(); }
   },
+  /* iPhone : « ambient » se mélange à la musique et n'ouvre pas de lecteur système ;
+     « playback » passe outre le mode Silencieux, mais iOS affiche alors son lecteur. */
   applySession() {
-    try { if (navigator.audioSession) navigator.audioSession.type = Prefs.v.iosPlayback ? 'playback' : 'auto'; } catch (e) { /* non pris en charge */ }
+    try { if (navigator.audioSession) navigator.audioSession.type = Prefs.v.iosPlayback ? 'playback' : 'ambient'; } catch (e) { /* non pris en charge */ }
+    this.meta();
+  },
+  /* Ce que le lecteur du système affiche, s'il apparaît : le nom de l'app et son icône, pas l'adresse du site */
+  meta(title) {
+    try {
+      if (!('mediaSession' in navigator) || !window.MediaMetadata) return;
+      const t = title || this.metaTitle || 'Séance';
+      const cur = navigator.mediaSession.metadata;
+      if (cur && cur.title === 'Timer Pro' && cur.artist === t) return;
+      this.metaTitle = t;
+      navigator.mediaSession.metadata = new MediaMetadata({ title: 'Timer Pro', artist: t, album: 'Timer Pro', artwork: [
+        { src: 'assets/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
+        { src: 'assets/icons/icon-512.png', sizes: '512x512', type: 'image/png' }] });
+    } catch (e) { /* non pris en charge */ }
   },
   async decodeAll() {
     const ctx = this.ctx;
@@ -1254,6 +1271,8 @@ const Sound = {
     this.log.push({ id, at: Date.now() }); if (this.log.length > 300) this.log.shift();
     if (!this.ctx) return false;
     if (this.ctx.state !== 'running') this.ctx.resume().catch(() => {});
+    const m = typeof Sessions !== 'undefined' && Sessions.main && Sessions.main();
+    this.meta(m ? m.timer.name : null);
     if (def && def.seq) { def.seq.forEach(([s, d]) => this.fire(s, d, this.volumeOf(id), opt)); return true; }
     return this.fire(id, 0, 1, opt);
   },
@@ -2703,7 +2722,7 @@ function renderSettings(root) {
     section('Sons',
       rangeRow('Volume général', p.masterVolume, 0, 1, .05, v => { p.masterVolume = v; Prefs.save(); Sound.setMaster(v); }, pct),
       audioCheck(),
-      'audioSession' in navigator ? toggle('Sonner malgré le mode Silencieux', p.iosPlayback, v => { p.iosPlayback = v; Prefs.save(); Sound.applySession(); }, 'Désactivé, le mode Silencieux de l\'iPhone coupe les sons. Activé, la musique en cours peut s\'interrompre.') : null,
+      'audioSession' in navigator ? toggle('Sonner malgré le mode Silencieux', p.iosPlayback, v => { p.iosPlayback = v; Prefs.save(); Sound.applySession(); }, 'Désactivé : les sons se mêlent à votre musique, mais le mode Silencieux les coupe. Activé : ils sonnent même en Silencieux, la musique en cours peut s\'arrêter et iOS affiche son lecteur « Timer Pro ».') : null,
       soundsPanel(),
       fold('Son de chaque phase et événement', false, Object.keys(SOUND_LABELS).map(k => field(SOUND_LABELS[k], soundPicker(p.soundMap[k], v => { p.soundMap[k] = v; Prefs.save(); }))))),
     section('Annonces vocales', voicePanel()),

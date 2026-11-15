@@ -82,6 +82,8 @@ Les couleurs sont une proposition personnelle : ce ne sont pas celles d'une appl
 
 Sur iPhone, un verrouillage, un appel ou une autre application qui prend le son peut bloquer le son d'une page web. L'application surveille son moteur audio : s'il se bloque, le bouton « Touchez pour réactiver le son » apparaît pendant la séance et un toucher le reconstruit. Réglages > Sons > Tester le son et la voix indique l'état réel et fait un essai.
 
+Les sons font partie de l'application : ils sont enregistrés sur le téléphone à la première ouverture et fonctionnent sans réseau. Si l'option « Sonner malgré le mode Silencieux » est activée, iOS affiche son lecteur (écran verrouillé, centre de contrôle), nommé « Timer Pro ». Désactivée, il n'y a pas de lecteur et les sons se mêlent à votre musique, mais le mode Silencieux les coupe.
+
 Si le test reste muet : vérifiez le bouton Silencieux de l'iPhone (ou activez « Sonner malgré le mode Silencieux »), le volume du téléphone et le volume général de l'application.
 
 ## Mettre à jour
@@ -90,7 +92,7 @@ Après chaque nouvelle version, changez `VERSION` dans `sw.js`. Sur iPhone, l'ic
 
 ## État des tests
 
-Effectués dans Chrome : 30 tests du moteur sur horloge simulée et 36 tests de bout en bout (audio Web Audio réel, séances complètes, reprise après gel et actualisation, import et export, hors connexion, données invalides, multitimer, largeur 320 px).
+Effectués dans Chrome : 30 tests du moteur sur horloge simulée et 37 tests de bout en bout (audio Web Audio réel, séances complètes, reprise après gel et actualisation, import et export, hors connexion, données invalides, multitimer, largeur 320 px).
 
 Non effectués : essai sur un vrai iPhone ou dans Safari, écoute humaine du gong. Le gong a été choisi d'après ses mesures (spectre, attaque, décroissance, absence d'écrêtage).
 
